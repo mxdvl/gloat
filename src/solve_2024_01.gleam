@@ -4,7 +4,7 @@ import gleam/result
 import gleam/string
 
 pub fn part_one(input: String) -> Int {
-  let pairs =
+  let #(left, right) =
     input
     |> string.trim()
     |> string.split("\n")
@@ -21,8 +21,11 @@ pub fn part_one(input: String) -> Int {
       })
       |> result.unwrap([])
     })
+    |> list.unzip()
 
-  echo pairs
-
-  list.length(pairs)
+  list.zip(list.sort(left, int.compare), list.sort(right, int.compare))
+  |> list.fold(0, fn(accumulator, pair) {
+    let #(l, r) = pair
+    accumulator + int.absolute_value(l - r)
+  })
 }
