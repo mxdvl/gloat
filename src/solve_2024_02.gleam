@@ -19,11 +19,8 @@ pub fn part_one(input: String) -> Int {
 
     case levels {
       [#(first, second), ..] ->
-        list.all(levels, fn(pair) {
-          let #(left, right) = pair
-          safe(left, right, int.compare(first, second))
-        })
-
+        levels
+        |> list.all(safe(_, int.compare(first, second)))
       _ -> False
     }
   })
@@ -54,10 +51,7 @@ pub fn part_two(input: String) -> Int {
       case levels {
         [#(first, second), ..] ->
           levels
-          |> list.all(fn(pair) {
-            let #(left, right) = pair
-            safe(left, right, int.compare(first, second))
-          })
+          |> list.all(safe(_, int.compare(first, second)))
         _ -> False
       }
     })
@@ -65,7 +59,8 @@ pub fn part_two(input: String) -> Int {
   |> list.length()
 }
 
-fn safe(left: Int, right: Int, order: order.Order) -> Bool {
+fn safe(pair: #(Int, Int), order: order.Order) -> Bool {
+  let #(left, right) = pair
   let difference = int.absolute_value(left - right)
   1 <= difference && difference <= 3 && order == int.compare(left, right)
 }
