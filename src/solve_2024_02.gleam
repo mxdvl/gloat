@@ -11,23 +11,20 @@ pub fn part_one(input: String) -> Int {
 }
 
 pub fn part_two(input: String) -> Int {
-  input
-  |> parse
-  |> list.count(fn(report) {
-    yielder.unfold(list.length(report), fn(index) {
-      case index {
-        -1 -> yielder.Done
-        _ -> yielder.Next(drop_from_list(report, index), index - 1)
-      }
-    })
-    |> yielder.any(safe_report)
+  use report <- list.count(parse(input))
+  yielder.unfold(list.length(report), fn(index) {
+    case index {
+      -1 -> yielder.Done
+      _ -> yielder.Next(drop_from_list(report, index), index - 1)
+    }
   })
+  |> yielder.any(safe_report)
 }
 
 fn parse(input: String) -> List(List(Int)) {
   use line <- list.map(string.split(input, "\n"))
-  use item <- list.flat_map(string.split(line, " "))
-  case int.base_parse(item, 10) {
+  use level <- list.flat_map(string.split(line, " "))
+  case int.base_parse(level, 10) {
     Ok(value) -> [value]
     Error(_) -> []
   }
@@ -44,8 +41,10 @@ fn safe_report(report: List(Int)) {
 
 fn safe(pair: #(Int, Int), order: order.Order) -> Bool {
   let #(left, right) = pair
-  let difference = int.absolute_value(left - right)
-  1 <= difference && difference <= 3 && order == int.compare(left, right)
+  case int.absolute_value(left - right) {
+    1 | 2 | 3 -> order == int.compare(left, right)
+    _ -> False
+  }
 }
 
 fn drop_from_list(list: List(t), index: Int) -> List(t) {
