@@ -5,18 +5,9 @@ import gleam/string
 
 pub fn part_one(input: String) -> Int {
   input
-  |> string.split("\n")
+  |> parse()
   |> list.filter(fn(line) {
-    let levels =
-      string.split(line, " ")
-      |> list.flat_map(fn(item) {
-        case int.base_parse(item, 10) {
-          Ok(value) -> [value]
-          Error(_) -> []
-        }
-      })
-      |> list.window_by_2()
-
+    let levels = list.window_by_2(line)
     case levels {
       [#(first, second), ..] ->
         levels
@@ -29,16 +20,7 @@ pub fn part_one(input: String) -> Int {
 
 pub fn part_two(input: String) -> Int {
   input
-  |> string.split("\n")
-  |> list.map(fn(line) {
-    string.split(line, " ")
-    |> list.flat_map(fn(item) {
-      case int.base_parse(item, 10) {
-        Ok(value) -> [value]
-        Error(_) -> []
-      }
-    })
-  })
+  |> parse()
   |> list.filter(fn(report) {
     [
       report,
@@ -57,6 +39,20 @@ pub fn part_two(input: String) -> Int {
     })
   })
   |> list.length()
+}
+
+fn parse(input: String) -> List(List(Int)) {
+  input
+  |> string.split("\n")
+  |> list.map(fn(line) {
+    string.split(line, " ")
+    |> list.flat_map(fn(item) {
+      case int.base_parse(item, 10) {
+        Ok(value) -> [value]
+        Error(_) -> []
+      }
+    })
+  })
 }
 
 fn safe(pair: #(Int, Int), order: order.Order) -> Bool {
