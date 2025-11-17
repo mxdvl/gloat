@@ -2,6 +2,7 @@ import gleam/int
 import gleam/list
 import gleam/order
 import gleam/string
+import gleam/yielder
 
 pub fn part_one(input: String) -> Int {
   input
@@ -13,13 +14,13 @@ pub fn part_two(input: String) -> Int {
   input
   |> parse
   |> list.count(fn(report) {
-    [
-      report,
-      ..list.flat_map(report, fn(_) {
-        list.index_map(report, fn(_, index) { drop_from_list(report, index) })
-      })
-    ]
-    |> list.any(safe_report)
+    yielder.unfold(list.length(report), fn(index) {
+      case index {
+        -1 -> yielder.Done
+        _ -> yielder.Next(drop_from_list(report, index), index - 1)
+      }
+    })
+    |> yielder.any(safe_report)
   })
 }
 

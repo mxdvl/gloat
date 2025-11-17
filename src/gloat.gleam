@@ -30,7 +30,7 @@ fn display(
 ) -> Nil {
   case simplifile.read(filepath) {
     Ok(content) -> {
-      io.println("Results for 2024 Day 1:")
+      io.println("Results for " <> filepath <> ":")
       io.println("Part one: " <> one(content) |> int.to_string())
       io.println("Part two: " <> two(content) |> int.to_string())
     }
