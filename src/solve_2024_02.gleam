@@ -25,17 +25,12 @@ pub fn part_two(input: String) -> Int {
 }
 
 fn parse(input: String) -> List(List(Int)) {
-  input
-  |> string.split("\n")
-  |> list.map(fn(line) {
-    string.split(line, " ")
-    |> list.flat_map(fn(item) {
-      case int.base_parse(item, 10) {
-        Ok(value) -> [value]
-        Error(_) -> []
-      }
-    })
-  })
+  use line <- list.map(string.split(input, "\n"))
+  use item <- list.flat_map(string.split(line, " "))
+  case int.base_parse(item, 10) {
+    Ok(value) -> [value]
+    Error(_) -> []
+  }
 }
 
 fn safe_report(report: List(Int)) {
