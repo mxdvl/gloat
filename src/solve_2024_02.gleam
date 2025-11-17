@@ -41,8 +41,7 @@ fn safe_report(report: List(Int)) {
   let levels = list.window_by_2(report)
   case levels {
     [#(first, second), ..] ->
-      levels
-      |> list.all(safe(_, int.compare(first, second)))
+      list.all(levels, safe(_, int.compare(first, second)))
     _ -> False
   }
 }
