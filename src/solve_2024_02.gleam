@@ -39,10 +39,10 @@ fn parse(input: String) -> List(List(Int)) {
 }
 
 fn safe_report(report: List(Int)) {
-  let levels = list.window_by_2(report)
-  case levels {
-    [#(first, second), ..] ->
-      list.all(levels, safe(_, int.compare(first, second)))
+  case report {
+    [first, second, ..] ->
+      list.window_by_2(report)
+      |> list.all(safe(_, int.compare(first, second)))
     _ -> False
   }
 }
