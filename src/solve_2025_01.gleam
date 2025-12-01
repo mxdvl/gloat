@@ -11,6 +11,9 @@ pub fn part_one(input: String) -> Int {
   |> pair.second
 }
 
+/// very inspired by @hunkyjimpjorps’s
+/// [solution](https://github.com/hunkyjimpjorps/AdventOfCode/blob/1686f7c23521/gleam/aoc2025/src/aoc_2025/day_1.gleam#L20-L28)
+/// and insight in using scan + whether the dial points to 0
 pub fn part_two(input: String) -> Int {
   input
   |> parse
