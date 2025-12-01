@@ -31,8 +31,7 @@ pub fn part_two(input: String) -> Int {
 }
 
 fn count_zeros(numbers: List(Int)) -> #(Int, Int) {
-  use accumulator, rotation <- list.fold(numbers, #(50, 0))
-  let #(previous, seen) = accumulator
+  use #(previous, seen), rotation <- list.fold(numbers, #(50, 0))
   case { previous + rotation } % 100 {
     0 -> #(0, seen + 1)
     next -> #(next, seen)
