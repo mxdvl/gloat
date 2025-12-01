@@ -21,10 +21,11 @@ pub fn part_one_test() {
     |> solve_2025_01.part_one
   assert result == 3
 }
-// pub fn part_two_test() {
-//   let result =
-//     input
-//     |> string.trim
-//     |> solve_2025_01.part_two
-//   assert result == 6
-// }
+
+pub fn part_two_test() {
+  let result =
+    input
+    |> string.trim
+    |> solve_2025_01.part_two
+  assert result == 6
+}
