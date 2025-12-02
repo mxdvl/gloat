@@ -1,5 +1,7 @@
+import gleam/float
 import gleam/int
 import gleam/list
+import gleam/result
 import gleam/string
 
 pub fn part_one(input: String) -> Int {
@@ -9,9 +11,16 @@ pub fn part_one(input: String) -> Int {
   case string.length(string) {
     length if length % 2 == 0 -> {
       let half = length / 2
-      case string.drop_start(string, half) == string.drop_end(string, half) {
-        True -> accumulator + x
-        False -> accumulator
+      case int.power(10, int.to_float(half)) |> result.map(float.truncate) {
+        Ok(modulus) -> {
+          let left = x % modulus
+          let right = x / modulus
+          case left == right {
+            True -> accumulator + x
+            False -> accumulator
+          }
+        }
+        _ -> accumulator
       }
     }
     _ -> accumulator
