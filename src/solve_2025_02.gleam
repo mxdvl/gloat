@@ -27,6 +27,10 @@ pub fn part_one(input: String) -> Int {
   }
 }
 
+pub fn part_two(_input: String) -> Int {
+  -1
+}
+
 fn parse(input: String) -> List(Int) {
   use line <- list.flat_map(string.split(input, ","))
   case list.map(string.split(line, "-"), int.parse) {
