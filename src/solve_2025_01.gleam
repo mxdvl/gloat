@@ -24,7 +24,7 @@ pub fn part_two(input: String) -> Int {
     let #(from, to) = pair
     list.range(from, to)
     |> list.drop(1)
-    |> echo
+    // |> echo
     |> list.count(fn(position) { position % 100 == 0 })
     |> int.add(accumulator)
   })
