@@ -1,6 +1,7 @@
 import gleam/float
 import gleam/int
 import gleam/list
+import gleam/regexp
 import gleam/result
 import gleam/string
 
@@ -27,8 +28,31 @@ pub fn part_one(input: String) -> Int {
   }
 }
 
-pub fn part_two(_input: String) -> Int {
-  -1
+pub fn part_two(input: String) -> Int {
+  use accumulator, x <- list.fold(parse(input), 0)
+  case valid("", int.to_string(x)) {
+    True -> accumulator + x
+    False -> accumulator
+  }
+}
+
+fn valid(head: String, tail: String) -> Bool {
+  case string.pop_grapheme(tail) {
+    Ok(#(next, rest)) -> {
+      let repeatable = string.concat([head, next])
+      let repeat = string.length(rest) / string.length(repeatable)
+      case repeat > 0 && string.repeat(repeatable, repeat) == rest {
+        True -> {
+          // echo #(repeatable, rest, repeat)
+          True
+        }
+        False -> {
+          valid(repeatable, rest)
+        }
+      }
+    }
+    Error(_) -> False
+  }
 }
 
 fn parse(input: String) -> List(Int) {

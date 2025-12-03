@@ -12,3 +12,11 @@ pub fn part_one_test() {
     |> solve_2025_02.part_one
   assert result == 1_227_775_554
 }
+
+pub fn part_two_test() {
+  let result =
+    input
+    |> string.trim
+    |> solve_2025_02.part_two
+  assert result == 4_174_379_265
+}
