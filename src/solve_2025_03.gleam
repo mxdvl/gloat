@@ -40,11 +40,11 @@ pub fn part_two(input: String) -> Int {
 
   let added =
     filler([], sorted, 12, list.length(sorted))
-    |> echo
+    // |> echo
     |> list.fold(0, fn(accumulator, battery) {
       accumulator * 10 + battery.joltage
     })
-    |> echo
+  // |> echo
 
   accumulator + added
 }
@@ -65,8 +65,8 @@ fn filler(
         Ok(battery) -> {
           let left_to_check =
             list.filter(left_to_check, fn(b) { b.index > battery.index })
-          echo #(battery, banks_to_fill - 1, length, so_far)
-          echo left_to_check
+          // echo #(battery, banks_to_fill - 1, length, so_far)
+          // echo left_to_check
           filler(
             list.append(so_far, [battery]),
             left_to_check,
