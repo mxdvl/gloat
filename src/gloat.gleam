@@ -7,6 +7,7 @@ import solve_2024_01
 import solve_2024_02
 import solve_2025_01
 import solve_2025_02
+import solve_2025_03
 
 pub fn main() -> Nil {
   case argv.load().arguments {
@@ -19,6 +20,8 @@ pub fn main() -> Nil {
       display(#(2025, 1), solve_2025_01.part_one, solve_2025_01.part_two)
     ["2025", "2"] ->
       display(#(2025, 2), solve_2025_02.part_one, solve_2025_02.part_two)
+    ["2025", "3"] ->
+      display(#(2025, 3), solve_2025_03.part_one, solve_2025_03.part_two)
     ["2025", _] -> io.print("No solutions for 2025")
     _ -> io.print("Please provide the following arguments: <year> <day>")
   }
