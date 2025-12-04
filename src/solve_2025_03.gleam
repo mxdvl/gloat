@@ -30,20 +30,36 @@ pub fn part_two(input: String) -> Int {
   |> int.add(accumulator)
 }
 
-fn light_up(
-  banks: List(Int),
-  batteries: List(Int),
-  padding: List(Int),
-) -> List(Int) {
-  case padding {
-    [] -> banks
+/// recursively move items from rightmost to leftmost lists
+///
+/// ```
+/// [] [2,2,3,1] [2,2]
+///     │ │ │ │ ┌─┘ │  pop right into middle
+/// [] [2,2,3,1,2] [2]
+///         │ │ │   │  drop middle below max (3)
+///        [3,1,2] [2]
+///  ┌──────┘ └┬┘   │
+///  │    ┌────┘    │  pop middle into right
+///  │   ┌┴┐   ┌────┘
+/// [3] [1,2] [2]      recurse with new state
+///  │   │ │ ┌─┘
+/// [3] [1,2,2] []
+///  │     │ │         drop middle below max (2)
+/// [3]   [2,2] []
+///  │ ┌───┘ │         pop middle into right
+///  │ │   ┌─┘
+/// [3,2] [2] []       end as right is empty
+/// ```
+fn light_up(left: List(Int), middle: List(Int), right: List(Int)) -> List(Int) {
+  case right {
+    [] -> left
     [next, ..padding] -> {
-      let candidates = list.append(batteries, [next])
+      let candidates = list.append(middle, [next])
       let max = candidates |> list.max(int.compare) |> result.unwrap(0)
       let candidates =
         list.drop_while(candidates, fn(battery) { battery < max })
       case candidates {
-        [max, ..rest] -> light_up(list.append(banks, [max]), rest, padding)
+        [max, ..rest] -> light_up(list.append(left, [max]), rest, padding)
         _ -> []
       }
     }
