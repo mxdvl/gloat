@@ -1,6 +1,6 @@
 import gleam/int
 import gleam/list
-import gleam/order
+import gleam/result
 import gleam/string
 
 pub fn part_one(input: String) -> Int {
@@ -20,61 +20,31 @@ pub fn part_one(input: String) -> Int {
   accumulator + tens * 10 + ones
 }
 
-type Battery {
-  Battery(joltage: Int, index: Int)
-}
-
 pub fn part_two(input: String) -> Int {
   use accumulator, digits <- list.fold(parse(input), 0)
 
-  let sorted =
-    digits
-    |> list.index_map(Battery)
-    |> list.sort(fn(left, right) {
-      order.break_tie(
-        in: int.compare(right.joltage, left.joltage),
-        with: int.compare(left.index, right.index),
-      )
-    })
-  // |> echo
+  let padding = list.length(digits) - 12
 
-  let added =
-    filler([], sorted, 12, list.length(sorted))
-    // |> echo
-    |> list.fold(0, fn(accumulator, battery) {
-      accumulator * 10 + battery.joltage
-    })
-  // |> echo
-
-  accumulator + added
+  light_up([], digits |> list.take(padding), digits |> list.drop(padding))
+  |> list.fold(0, fn(accumulator, joltage) { accumulator * 10 + joltage })
+  |> int.add(accumulator)
 }
 
-fn filler(
-  so_far: List(Battery),
-  left_to_check: List(Battery),
-  banks_to_fill: Int,
-  length: Int,
-) -> List(Battery) {
-  case banks_to_fill {
-    0 -> so_far
-    _ -> {
-      case
-        left_to_check
-        |> list.find(fn(battery) { battery.index + banks_to_fill <= length })
-      {
-        Ok(battery) -> {
-          let left_to_check =
-            list.filter(left_to_check, fn(b) { b.index > battery.index })
-          // echo #(battery, banks_to_fill - 1, length, so_far)
-          // echo left_to_check
-          filler(
-            list.append(so_far, [battery]),
-            left_to_check,
-            banks_to_fill - 1,
-            length,
-          )
-        }
-        Error(_) -> []
+fn light_up(
+  banks: List(Int),
+  batteries: List(Int),
+  padding: List(Int),
+) -> List(Int) {
+  case padding {
+    [] -> banks
+    [next, ..padding] -> {
+      let candidates = list.append(batteries, [next])
+      let max = candidates |> list.max(int.compare) |> result.unwrap(0)
+      let candidates =
+        list.drop_while(candidates, fn(battery) { battery < max })
+      case candidates {
+        [max, ..rest] -> light_up(list.append(banks, [max]), rest, padding)
+        _ -> []
       }
     }
   }
