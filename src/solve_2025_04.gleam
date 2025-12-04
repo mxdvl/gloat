@@ -70,5 +70,5 @@ fn parse(input: String) -> set.Set(Point) {
   }
   |> list.flatten
   |> set.from_list
-  |> set.difference(set.from_list([decoy]))
+  |> set.delete(decoy)
 }
