@@ -18,62 +18,59 @@ const adjacencies = [
 ]
 
 pub fn part_one(input: String) -> Int {
-  let adjacencies = set.from_list(adjacencies)
   let set = parse(input)
   use accumulator, point <- set.fold(set, 0)
-  let rolls =
-    adjacencies
-    |> set.map(fn(delta) { Point(point.x + delta.x, point.y + delta.y) })
-    |> set.intersection(set)
-    |> set.size
-
-  // echo #(point, rolls)
-
-  case rolls < 4 {
+  case movable(set, point) {
     True -> accumulator + 1
     False -> accumulator
   }
 }
 
 pub fn part_two(input: String) -> Int {
-  let set = parse(input)
-  let final = forklift(set)
-  set.difference(set, final) |> set.size
+  let initial = parse(input)
+  let final = forklift(initial)
+  set.difference(initial, final) |> set.size
 }
 
+/// keep removing rolls until they are all too dense
 fn forklift(set: set.Set(Point)) -> set.Set(Point) {
-  let adjacencies = set.from_list(adjacencies)
-  let movable = {
+  let moved = {
     use accumulator, point <- set.fold(set, set.new())
-    let rolls =
-      adjacencies
-      |> set.map(fn(delta) { Point(point.x + delta.x, point.y + delta.y) })
-      |> set.intersection(set)
-      |> set.size
-
-    case rolls < 4 {
+    case movable(set, point) {
       True -> accumulator |> set.insert(point)
       False -> accumulator
     }
   }
 
-  case set.size(movable) {
+  case set.size(moved) {
     0 -> set
-    _ -> forklift(set.difference(set, movable))
+    _ -> forklift(set.difference(set, moved))
   }
 }
 
+fn movable(set: set.Set(Point), point: Point) -> Bool {
+  let rolls =
+    adjacencies
+    |> list.map(fn(delta) { Point(point.x + delta.x, point.y + delta.y) })
+    |> set.from_list
+    |> set.intersection(set)
+    |> set.size
+
+  rolls < 4
+}
+
 fn parse(input: String) -> set.Set(Point) {
+  let decoy = Point(-1, -1)
   let lines = input |> string.trim |> string.split("\n")
   {
     use line, y <- list.index_map(lines)
     use grapheme, x <- list.index_map(string.to_graphemes(line))
     case grapheme {
       "@" -> Point(x:, y:)
-      _ -> Point(-1, -1)
+      _ -> decoy
     }
   }
   |> list.flatten
   |> set.from_list
-  |> set.difference(set.from_list([Point(-1, -1)]))
+  |> set.difference(set.from_list([decoy]))
 }
