@@ -52,9 +52,7 @@ fn movable(set: set.Set(Point), point: Point) -> Bool {
   let rolls =
     adjacencies
     |> list.map(fn(delta) { Point(point.x + delta.x, point.y + delta.y) })
-    |> set.from_list
-    |> set.intersection(set)
-    |> set.size
+    |> list.count(set.contains(set, _))
 
   rolls < 4
 }
