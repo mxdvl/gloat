@@ -36,7 +36,31 @@ pub fn part_one(input: String) -> Int {
 }
 
 pub fn part_two(input: String) -> Int {
-  -1
+  let set = parse(input)
+  let final = forklift(set)
+  set.difference(set, final) |> set.size
+}
+
+fn forklift(set: set.Set(Point)) -> set.Set(Point) {
+  let adjacencies = set.from_list(adjacencies)
+  let movable = {
+    use accumulator, point <- set.fold(set, set.new())
+    let rolls =
+      adjacencies
+      |> set.map(fn(delta) { Point(point.x + delta.x, point.y + delta.y) })
+      |> set.intersection(set)
+      |> set.size
+
+    case rolls < 4 {
+      True -> accumulator |> set.insert(point)
+      False -> accumulator
+    }
+  }
+
+  case set.size(movable) {
+    0 -> set
+    _ -> forklift(set.difference(set, movable))
+  }
 }
 
 fn parse(input: String) -> set.Set(Point) {
