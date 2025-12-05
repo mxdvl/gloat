@@ -33,8 +33,7 @@ pub fn part_two(input: String) -> Int {
       |> list.map(fn(range) { range.to })
       |> list.fold(range.to, int.max)
 
-    [Range(from:, to:), ..excluded]
-    |> list.sort(compare)
+    list.append(excluded, [Range(from:, to:)])
   }
 
   use accumulator, range <- list.fold(merged, 0)
