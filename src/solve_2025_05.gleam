@@ -1,7 +1,6 @@
 import gleam/int
 import gleam/list
 import gleam/result
-import gleam/set
 import gleam/string
 
 pub fn part_one(input: String) -> Int {
@@ -14,20 +13,54 @@ pub fn part_one(input: String) -> Int {
 pub fn part_two(input: String) -> Int {
   let #(ranges, _) = parse(input)
 
-  // this crashes!! :(
-  // let ingredients = {
-  //   use accumulator, range <- list.fold(ranges, set.new())
-  //   let ingredients = list.range(range.from, range.to) |> set.from_list
-  //   // echo #(range, size)
-  //   accumulator |> set.union(ingredients)
-  // }
-  // set.size(ingredients)
+  let compare = fn(left: Range, right: Range) {
+    int.compare(left.from, right.from)
+  }
 
-  -1
+  let sorted = ranges |> list.sort(compare)
+
+  let merged = {
+    use accumulator: List(Range), range <- list.fold(sorted, [])
+    let #(overlapping, excluded) =
+      accumulator
+      |> list.partition(overlaps(range, _))
+    let from =
+      overlapping
+      |> list.map(fn(range) { range.from })
+      |> list.fold(range.from, int.min)
+    let to =
+      overlapping
+      |> list.map(fn(range) { range.to })
+      |> list.fold(range.to, int.max)
+
+    [Range(from:, to:), ..excluded]
+    |> list.sort(compare)
+  }
+
+  use accumulator, range <- list.fold(merged, 0)
+  let size = range.to - range.from + 1
+  // echo #(range, size)
+  accumulator + size
 }
 
 type Range {
   Range(from: Int, to: Int)
+}
+
+/// checks whether two inclusive ranges overlap
+/// ```
+/// ├───┤
+///     ├────┤
+///
+///   ├──┤
+/// ├──────┤
+///
+/// ├──┤
+///  ├──────┤
+///```
+fn overlaps(left: Range, right: Range) {
+  { left.from <= right.from && right.from <= left.to }
+  || { right.from <= left.from && left.from <= right.to }
 }
 
 fn parse(input: String) -> #(List(Range), List(Int)) {
