@@ -61,8 +61,14 @@ pub fn part_two(input: String) -> Int {
     |> list.map(fn(beam) { #(beam.x, 1) })
     |> dict.from_list
 
+  let max =
+    splitters
+    |> list.map(pair.first)
+    |> list.map(fn(p) { p.y })
+    |> list.fold(0, int.max)
+
   let splitters =
-    list.range(1, 100)
+    list.range(1, max)
     |> list.map(fn(y) {
       splitters
       |> list.map(pair.first)
@@ -109,7 +115,7 @@ fn quantum_propagate(beams: Dict(Int, Int), splitters: List(Set(Int))) -> Int {
             })
         }
       }
-      // echo #(beams, splitters)
+      echo #(beams, splitters)
       quantum_propagate(beams, remaining_splitters)
     }
   }
