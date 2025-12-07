@@ -89,33 +89,19 @@ fn quantum_propagate(beams: Dict(Int, Int), splitters: List(Set(Int))) -> Int {
     [] -> beams |> dict.values |> list.fold(0, int.add)
     [splitters, ..remaining_splitters] -> {
       let beams = {
-        use accumulator, x, states <- dict.fold(beams, dict.new())
+        use accumulator, x, timelines <- dict.fold(beams, dict.new())
+        let add = fn(option) { option.unwrap(option, 0) + timelines }
         case splitters |> set.contains(x) {
           True ->
             accumulator
-            |> dict.upsert(x - 1, fn(val) {
-              case val {
-                Some(val) -> val + states
-                None -> states
-              }
-            })
-            |> dict.upsert(x + 1, fn(val) {
-              case val {
-                Some(val) -> val + states
-                None -> states
-              }
-            })
+            |> dict.upsert(x - 1, add)
+            |> dict.upsert(x + 1, add)
           False ->
             accumulator
-            |> dict.upsert(x, fn(val) {
-              case val {
-                Some(val) -> val + states
-                None -> states
-              }
-            })
+            |> dict.upsert(x, add)
         }
       }
-      echo #(beams, splitters)
+      // echo #(beams, splitters)
       quantum_propagate(beams, remaining_splitters)
     }
   }
