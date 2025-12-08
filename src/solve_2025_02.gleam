@@ -3,36 +3,43 @@ import gleam/list
 import gleam/set
 import gleam/string
 
-pub fn part_one(input: String) -> Int {
-  let invalids =
-    list.range(1, 9)
-    |> list.map(int.multiply(_, 11))
-    |> list.append(list.range(10, 99) |> list.map(int.multiply(_, 101)))
-    |> list.append(list.range(100, 999) |> list.map(int.multiply(_, 1001)))
-    |> list.append(list.range(1000, 9999) |> list.map(int.multiply(_, 10_001)))
-    |> list.append(
-      list.range(10_000, 99_999) |> list.map(int.multiply(_, 100_001)),
-    )
-    |> set.from_list
+type Range {
+  Range(start: Int, end: Int)
+}
 
-  use accumulator, id <- list.fold(parse(input), 0)
-  case invalids |> set.contains(id) {
-    True -> accumulator + id
-    False -> accumulator
-  }
+fn inside(range: Range, id: Int) {
+  range.start <= id && id <= range.end
+}
+
+pub fn part_one(input: String) -> Int {
+  let ranges = parse(input)
+
+  list.range(1, 9)
+  |> list.map(int.multiply(_, 11))
+  |> list.append(list.range(10, 99) |> list.map(int.multiply(_, 101)))
+  |> list.append(list.range(100, 999) |> list.map(int.multiply(_, 1001)))
+  |> list.append(list.range(1000, 9999) |> list.map(int.multiply(_, 10_001)))
+  |> list.append(
+    list.range(10_000, 99_999) |> list.map(int.multiply(_, 100_001)),
+  )
+  |> set.from_list
+  |> set.filter(fn(id) { ranges |> list.any(inside(_, id)) })
+  |> set.to_list
+  |> int.sum
 }
 
 pub fn part_two(input: String) -> Int {
-  // let max = parse(input) |> list.fold(0, int.max)
-  // echo #("max", max, int.to_string(max) |> string.length)
+  let ranges = parse(input)
+  // let max =
+  //   parse(input) |> list.map(fn(range) { range.end }) |> list.fold(0, int.max)
+  // echo #("max", max)
 
-  let invalids = list.range(2, 10) |> list.flat_map(invalids) |> set.from_list
-
-  use accumulator, id <- list.fold(parse(input), 0)
-  case invalids |> set.contains(id) {
-    True -> accumulator + id
-    False -> accumulator
-  }
+  list.range(2, 10)
+  |> list.flat_map(invalids)
+  |> set.from_list
+  |> set.filter(fn(id) { ranges |> list.any(inside(_, id)) })
+  |> set.to_list
+  |> int.sum
 }
 
 fn invalids(length: Int) {
@@ -78,10 +85,10 @@ fn invalids(length: Int) {
   }
 }
 
-fn parse(input: String) -> List(Int) {
+fn parse(input: String) -> List(Range) {
   use line <- list.flat_map(string.split(input, ","))
   case list.map(string.split(line, "-") |> list.map(string.trim), int.parse) {
-    [Ok(left), Ok(right)] -> list.range(left, right)
+    [Ok(start), Ok(end)] -> [Range(start:, end:)]
     _ -> []
   }
 }
