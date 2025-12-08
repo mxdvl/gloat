@@ -6,31 +6,36 @@ import gleam/result
 import gleam/set
 import gleam/string
 
-type Point {
-  Point(x: Int, y: Int, z: Int)
+type Box {
+  Box(x: Int, y: Int, z: Int)
 }
 
 type Connection {
-  Connection(a: Point, b: Point, distance: Int)
+  Connection(a: Box, b: Box, distance: Int)
 }
 
-fn distance(a: Point, b: Point) {
+fn distance(a: Box, b: Box) {
   0.0
   +. { int.power(a.x - b.x, 2.0) |> result.unwrap(0.0) }
   +. { int.power(a.y - b.y, 2.0) |> result.unwrap(0.0) }
   +. { int.power(a.z - b.z, 2.0) |> result.unwrap(0.0) }
   |> float.power(0.5)
   |> result.unwrap(-1.0)
+  |> float.truncate
 }
 
-fn with_distance(pair: #(Point, Point)) {
+fn with_distance(pair: #(Box, Box)) {
   let #(a, b) = pair
-  let distance = float.truncate(distance(a, b))
+  let distance = distance(a, b)
   Connection(a:, b:, distance:)
 }
 
 fn compare(a: Connection, b: Connection) {
   int.compare(a.distance, b.distance)
+}
+
+fn intersects(set: set.Set(Box), a: Box, b: Box) {
+  set.contains(set, a) || set.contains(set, b)
 }
 
 pub fn part_one(input: String) -> Int {
@@ -45,19 +50,15 @@ pub fn part_one(input: String) -> Int {
   |> list.map(with_distance)
   |> list.sort(compare)
   |> list.take(length)
-  |> list.fold([], fn(circuits: List(set.Set(Point)), connection) {
+  |> list.fold([], fn(circuits: List(set.Set(Box)), connection) {
     let Connection(a:, b:, ..) = connection
-    // echo #(a, b, triplet.2, circuits)
     let #(overlapping, disjoint) =
       circuits
-      |> list.partition(fn(set) { set.contains(set, a) || set.contains(set, b) })
+      |> list.partition(intersects(_, a, b))
 
-    let connection = set.new() |> set.insert(a) |> set.insert(b)
-
-    // echo #(list.length(overlapping), list.length(disjoint))
     [
       overlapping
-        |> list.fold(connection, set.union),
+        |> list.fold(set.from_list([a, b]), set.union),
       ..disjoint
     ]
   })
@@ -73,7 +74,6 @@ pub fn part_two(input: String) -> Int {
   let points =
     input
     |> parse
-
   let size = list.length(points)
 
   input
@@ -86,14 +86,12 @@ pub fn part_two(input: String) -> Int {
     let Connection(a:, b:, ..) = connection
     let #(overlapping, disjoint) =
       circuits
-      |> list.partition(fn(set) { set.contains(set, a) || set.contains(set, b) })
-
-    let connection = set.new() |> set.insert(a) |> set.insert(b)
+      |> list.partition(intersects(_, a, b))
     let joined =
       overlapping
-      |> list.fold(connection, set.union)
+      |> list.fold(set.from_list([a, b]), set.union)
 
-    case set.size(joined) == size {
+    case set.size(joined) >= size {
       True -> list.Stop(#([], int.multiply(a.x, b.x)))
       False -> list.Continue(#([joined, ..disjoint], -1))
     }
@@ -101,10 +99,10 @@ pub fn part_two(input: String) -> Int {
   |> pair.second
 }
 
-fn parse(input: String) -> List(Point) {
+fn parse(input: String) -> List(Box) {
   use line <- list.flat_map(string.split(input, "\n"))
   case line |> string.split(",") |> list.map(int.parse) {
-    [Ok(x), Ok(y), Ok(z)] -> [Point(x:, y:, z:)]
+    [Ok(x), Ok(y), Ok(z)] -> [Box(x:, y:, z:)]
     _ -> []
   }
 }
