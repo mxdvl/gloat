@@ -80,7 +80,7 @@ fn invalids(length: Int) {
 
 fn parse(input: String) -> List(Int) {
   use line <- list.flat_map(string.split(input, ","))
-  case list.map(string.split(line, "-"), int.parse) {
+  case list.map(string.split(line, "-") |> list.map(string.trim), int.parse) {
     [Ok(left), Ok(right)] -> list.range(left, right)
     _ -> []
   }
