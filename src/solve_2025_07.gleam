@@ -1,7 +1,7 @@
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option
 import gleam/pair
 import gleam/result
 import gleam/set.{type Set}
@@ -81,15 +81,25 @@ pub fn part_two(input: String) -> Int {
       |> set.from_list
     })
 
-  quantum_propagate(beams, splitters)
+  quantum_propagate([beams], splitters)
+  |> list.first
+  |> result.unwrap(dict.new())
+  |> dict.values
+  |> list.fold(0, int.add)
 }
 
-fn quantum_propagate(beams: Dict(Int, Int), splitters: List(Set(Int))) -> Int {
+fn quantum_propagate(
+  beams: List(Dict(Int, Int)),
+  splitters: List(Set(Int)),
+) -> List(Dict(Int, Int)) {
   case splitters {
-    [] -> beams |> dict.values |> list.fold(0, int.add)
+    [] -> beams
     [splitters, ..remaining_splitters] -> {
-      let beams = {
-        use accumulator, x, timelines <- dict.fold(beams, dict.new())
+      let next_beams = {
+        use accumulator, x, timelines <- dict.fold(
+          list.first(beams) |> result.unwrap(dict.new()),
+          dict.new(),
+        )
         let add = fn(option) { option.unwrap(option, 0) + timelines }
         case splitters |> set.contains(x) {
           True ->
@@ -102,7 +112,7 @@ fn quantum_propagate(beams: Dict(Int, Int), splitters: List(Set(Int))) -> Int {
         }
       }
       // echo #(beams, splitters)
-      quantum_propagate(beams, remaining_splitters)
+      quantum_propagate([next_beams, ..beams], remaining_splitters)
     }
   }
 }
