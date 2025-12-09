@@ -25,5 +25,5 @@ pub fn part_two_test() {
     input
     |> string.trim
     |> solve_2025_09.part_two
-  assert result == -1
+  assert result == 24
 }
