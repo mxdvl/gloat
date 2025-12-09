@@ -8,12 +8,12 @@ type Tile {
 }
 
 type Rectangle {
-  Rectangle(south_west: Tile, north_east: Tile, area: Int)
+  Rectangle(north_west: Tile, south_east: Tile, area: Int)
 }
 
-fn area(south_west: Tile, north_east: Tile) {
-  let dx = north_east.x - south_west.x |> int.absolute_value |> int.add(1)
-  let dy = north_east.y - south_west.y |> int.absolute_value |> int.add(1)
+fn area(north_west: Tile, south_east: Tile) {
+  let dx = south_east.x - north_west.x |> int.add(1)
+  let dy = south_east.y - north_west.y |> int.add(1)
   dx * dy
 }
 
@@ -26,9 +26,13 @@ pub fn part_one(input: String) -> Int {
   |> parse
   |> list.combination_pairs
   |> list.map(fn(pair) {
-    let #(south_west, north_east) = pair
-    let area = area(south_west, north_east)
-    Rectangle(south_west:, north_east:, area:)
+    let #(first, second) = pair
+    let north_west =
+      Tile(int.min(first.x, second.x), int.min(first.y, second.y))
+    let south_east =
+      Tile(int.max(first.x, second.x), int.max(first.y, second.y))
+    let area = area(north_west, south_east)
+    Rectangle(north_west:, south_east:, area:)
   })
   |> list.sort(compare)
   // |> echo
