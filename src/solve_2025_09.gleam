@@ -1,3 +1,4 @@
+import gleam/bool
 import gleam/int
 import gleam/list
 import gleam/order
@@ -45,32 +46,33 @@ pub fn part_one(input: String) -> Int {
   |> result.unwrap(-1)
 }
 
+type Edge {
+  Horizontal(y: Int, west: Int, east: Int)
+  Vertical(x: Int, north: Int, south: Int)
+}
+
 pub fn part_two(input: String) -> Int {
-  let tiles =
+  let red_tiles =
     input
     |> parse
 
   let edges =
-    tiles
-    |> list.append(tiles |> list.take(1))
+    red_tiles
+    |> list.append(red_tiles |> list.take(1))
     |> list.window_by_2
     |> list.flat_map(fn(pair) {
       let #(first, second) = pair
-      case first.y == second.y {
-        True -> [
-          Edge(
-            first.y,
-            int.min(first.x, second.x),
-            int.max(first.x, second.x),
-            first.x > second.x,
-          ),
-        ]
-        False -> []
+      case
+        [first.x, second.x] |> list.unique |> list.sort(int.compare),
+        [first.y, second.y] |> list.unique |> list.sort(int.compare)
+      {
+        [west, east], [y] -> [Horizontal(y:, west:, east:)]
+        [x], [north, south] -> [Vertical(x:, north:, south:)]
+        _, _ -> []
       }
     })
-  // |> echo
 
-  tiles
+  red_tiles
   |> list.combination_pairs
   |> list.map(fn(pair) {
     let #(first, second) = pair
@@ -82,68 +84,47 @@ pub fn part_two(input: String) -> Int {
     Rectangle(north_west:, south_east:, area:)
   })
   |> list.sort(compare)
-  // |> list.filter(fn(rectangle) { rectangle.area < max_area })
   // |> echo
-  |> list.find(inside(_, edges))
+  |> list.find(does_not_intersect(_, edges))
   |> result.map(fn(rectangle) { rectangle.area })
   |> result.unwrap(-1)
 }
 
-type Edge {
-  Edge(y: Int, west: Int, east: Int, eastward: Bool)
+fn does_not_intersect(rectangle: Rectangle, edges: List(Edge)) {
+  // echo rectangle
+  intersects(rectangle, edges) |> bool.negate
 }
 
-/// Generate all points along the perimeter of the rectangle
-fn perimeter(rectangle: Rectangle) -> List(Tile) {
-  let Rectangle(north_west:, south_east:, ..) = rectangle
-
-  list.new()
-  |> list.append(
-    list.range(north_west.x, south_east.x)
-    |> list.flat_map(fn(x) { [Tile(x, north_west.y), Tile(x, south_east.y)] }),
-  )
-  |> list.append(
-    list.range(north_west.y, south_east.y)
-    |> list.flat_map(fn(y) { [Tile(north_west.x, y), Tile(south_east.x, y)] }),
-  )
-  |> list.unique
-  // |> list.shuffle // potential speedup?
-}
-
-fn inside(rectangle: Rectangle, edges: List(Edge)) -> Bool {
-  let Rectangle(north_west:, south_east:, ..) = rectangle
-  let relevant_edges =
-    edges
-    |> list.filter(fn(edge) {
-      edge.y > north_west.y
-      && edge.west <= south_east.x
-      && edge.east >= north_west.x
-    })
-
-  // echo #(rectangle, relevant_edges |> list.length)
-  rectangle |> perimeter |> list.all(point_inside(relevant_edges, _))
-}
-
-/// Check if a point is inside the polygon using horizontal ray casting
-fn point_inside(edges: List(Edge), tile: Tile) -> Bool {
+fn intersects(rectangle: Rectangle, edges: List(Edge)) {
   edges
-  |> list.flat_map(fn(edge) {
-    case edge.y >= tile.y && edge.west <= tile.x && tile.x <= edge.east {
-      True -> [
-        case edge.eastward {
-          True -> 1
-          False -> -1
-        },
-      ]
-      False -> []
+  |> list.any(fn(edge) {
+    // echo edge
+    case edge {
+      Horizontal(y:, west:, east:) -> {
+        // ┣━━━┫    no
+        //   ┌───┐
+        // ┣━┿┫  │  yes
+        //   │   │
+        //   │┣━┫│  yes
+        //   │   │
+        // ┣━┿━━━┿┫ yes
+        //   │   │
+        //   │   ┣┫ no
+        //   └───┘
+        True
+        && rectangle.north_west.y < y
+        && y < rectangle.south_east.y
+        && { west < rectangle.south_east.x && rectangle.north_west.x < east }
+      }
+      Vertical(x:, north:, south:) -> {
+        True
+        && rectangle.north_west.x < x
+        && x < rectangle.south_east.x
+        && { north < rectangle.south_east.y && rectangle.north_west.y < south }
+      }
     }
+    // |> echo
   })
-  |> int.sum
-  |> nonzero
-}
-
-fn nonzero(n: Int) -> Bool {
-  n != 0
 }
 
 fn parse(input: String) -> List(Tile) {
