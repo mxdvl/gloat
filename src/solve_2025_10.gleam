@@ -1,4 +1,3 @@
-import gleam/float
 import gleam/int
 import gleam/list
 import gleam/result
@@ -16,7 +15,6 @@ fn press(indicator: Indicator, presses: Int) {
   case
     list.combinations(indicator.buttons, presses)
     |> list.find(fn(buttons) {
-      // echo #(indicator.diagram |> format, buttons, buttons |> list.map(format))
       indicator.diagram == list.fold(buttons, 0, int.bitwise_exclusive_or)
     })
   {
@@ -33,8 +31,7 @@ fn press(indicator: Indicator, presses: Int) {
   }
 }
 
-pub fn part_two(input: String) -> Int {
-  // echo parse(input)
+pub fn part_two(_input: String) -> Int {
   -1
 }
 
@@ -68,10 +65,7 @@ fn parse(input: String) -> List(Indicator) {
             |> list.flat_map(digitise)
           // |> echo
           use accumulator, position <- list.fold(digits, 0)
-          let mask =
-            int.power(2, int.to_float(position))
-            |> result.unwrap(-1.0)
-            |> float.truncate
+          let mask = int.bitwise_shift_left(1, position)
           // echo #(position, mask |> int.to_base2)
           int.bitwise_or(accumulator, mask)
         })
