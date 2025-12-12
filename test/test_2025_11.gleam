@@ -22,10 +22,26 @@ pub fn part_one_test() {
   assert result == 5
 }
 
+const second_input = "
+svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out
+"
+
 pub fn part_two_test() {
   let result =
-    input
+    second_input
     |> string.trim
     |> solve_2025_11.part_two
-  assert result == -1
+  assert result == 2
 }

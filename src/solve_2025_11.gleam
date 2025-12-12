@@ -29,9 +29,36 @@ fn count_paths(
   }
 }
 
-pub fn part_two(_input: String) -> Int {
-  // echo parse(input)
-  -1
+pub fn part_two(input: String) -> Int {
+  let graph = parse(input)
+
+  let start = graph |> dict.get("svr") |> result.unwrap(set.new())
+  count_paths_along(graph, start, "out", set.from_list(["svr"]))
+}
+
+fn count_paths_along(
+  graph: Dict(String, Set(String)),
+  to_visit: Set(String),
+  end: String,
+  seen: Set(String),
+) {
+  use accumulator, node <- set.fold(to_visit, 0)
+  accumulator
+  + case node == end {
+    True -> {
+      case set.contains(seen, "dac"), set.contains(seen, "fft") {
+        True, True -> 1
+        _, _ -> 0
+      }
+    }
+    False ->
+      count_paths_along(
+        graph,
+        graph |> dict.get(node) |> result.unwrap(set.new()),
+        end,
+        seen |> set.insert(node),
+      )
+  }
 }
 
 fn parse(input: String) -> Dict(String, Set(String)) {
